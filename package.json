@@ -1,0 +1,25 @@
+{
+  "name": "tiniapp-ci",
+  "version": "1.0.0",
+  "description": "This repo. makes it easy to run tests and publish your app to Tini Console.",
+  "main": "index.js",
+  "scripts": {
+    "build:action": "ncc build src/github_action.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hoangviet/tiniapp-ci.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hoangviet/tiniapp-ci/issues"
+  },
+  "homepage": "https://github.com/hoangviet/tiniapp-ci#readme",
+  "dependencies": {
+    "@actions/core": "^1.9.0",
+    "@actions/exec": "^1.1.1",
+    "@actions/tool-cache": "^2.0.1",
+    "axios": "^0.27.2"
+  }
+}

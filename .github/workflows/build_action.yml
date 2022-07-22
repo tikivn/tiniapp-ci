@@ -1,0 +1,33 @@
+on:
+  push:
+    branches:
+      - disabled
+
+jobs:
+  build_action:
+    runs-on: ubuntu-latest
+    name: Build Github Action
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 15.0.1
+
+      - name: Install packages
+        run: npm install --network-timeout=300000
+
+      - name: Install ncc
+        run: npm i -g @vercel/ncc
+      
+      - name: Build Action
+        run: npm run build:action
+
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.36.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          WITH_V: true
+      
+
+      
+

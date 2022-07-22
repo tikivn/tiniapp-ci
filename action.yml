@@ -1,0 +1,21 @@
+name: 'TiniApp CI'
+description: 'Makes it easy to run tests and publish your app to Tini Console.'
+inputs:
+  app-id: 
+    description: 'Your app id on Tini Console'
+    required: true
+  user-id: 
+    description: 'Your user id on Tini Console'
+    required: true
+  developer-id: 
+    description: 'Your developer id on Tini Console'
+    required: true
+  access-token: 
+    description: 'Your acess-token to access Tini Console'
+    required: true
+  studio-version: 
+    description: 'Version which you want to build the app'
+    required: true
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
