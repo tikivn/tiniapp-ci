@@ -2,6 +2,16 @@
 
 This repo. makes it easy to run tests and publish your app to Tini Console.
 
+## Contact & Disscussion
+
+If you're tikie (Tiki Team) please contact Tini App team in #miniapp-community
+
+For outside tiki, you can join slack: 
+
+- https://join.slack.com/t/tini-apps/shared_invite/zt-1cx4frath-0leZORN_O8LAX6oaCahsaQ
+- or tini-apps.slack.com
+- or email: viet.nguyen@tiki.vn
+
 ## Version & Build number
 
 The script will increase version and build number based on your current version and status.
