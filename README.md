@@ -29,7 +29,7 @@ Adds a workflow with .yml file:
 on: [push]
 
 jobs:
-  hello_world_job:
+  publish_tiniapp:
     runs-on: ubuntu-latest
     name: Publish TiniApp to Tini Console
     steps:
