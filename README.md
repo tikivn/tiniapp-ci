@@ -24,6 +24,13 @@ The script will increase version and build number based on your current version 
 
 ### Github Action
 
+Follow this guides https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository for adding below secrets:
+
+- APP_ID
+- USER_ID
+- DEVELOPER_ID
+- ACCESS_TOKEN
+
 Adds a workflow with .yml file:
 ```yml
 on: [push]
@@ -42,7 +49,6 @@ jobs:
         run: npm install --network-timeout=300000
 
       - name: Build and publish app to Tini Console
-        id: hello
         uses: tikivn/tiniapp-ci@main
         with:
           app-id: ${{secrets.APP_ID}}
