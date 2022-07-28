@@ -65,7 +65,7 @@ jobs:
           user-id: ${{secrets.USER_ID}}
           developer-id: ${{secrets.DEVELOPER_ID}}
           access-token: ${{secrets.ACCESS_TOKEN}}
-          studio-version: 1.92.2
+          studio-version: 1.32.2
 ```
 
 ### CircleCI

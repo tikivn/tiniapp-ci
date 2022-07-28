@@ -8,16 +8,24 @@ ENV DEVELOPER_ID ""
 # Input your ACCESS_TOKEN where you can get from ~/.tiki/credentials.json
 ENV ACCESS_TOKEN ""
 
-ENV STUDIO_VERSION "1.92.2"
+ENV STUDIO_VERSION "1.32.2"
 ENV MINIAPP_ENV "production"
 ENV PUBLIC_PATH "./"
 
 RUN apk add --update curl jq && \
-    rm -rf /var/cache/apk/*
+  rm -rf /var/cache/apk/*
 
-RUN curl -s https://salt.tikicdn.com/ts/tiniapp/3a/bc/34/74c245bfbe9cc4b9770a5c85913dd6ae.zip > /tiniapp-cli.zip && \
-    unzip /tiniapp-cli.zip -d /bin && \
-    rm -v /tiniapp-cli.zip
+RUN  \
+  if [ -n "$STUDIO_VERSION" ] \
+  ;then \
+  curl -s https://tiniapp-media.tikicdn.com/tiniapp-ci/tiniapp-ci-v${STUDIO_VERSION}.zip > /tiniapp-cli.zip && \
+  unzip /tiniapp-cli.zip -d /bin && \
+  rm -v /tiniapp-cli.zip \
+  ;else \
+  curl -s https://tiniapp-media.tikicdn.com/tiniapp-ci/tiniapp-ci-latest.zip > /tiniapp-cli.zip && \
+  unzip /tiniapp-cli.zip -d /bin && \
+  rm -v /tiniapp-cli.zip \
+  ;fi
 
 RUN curl 'https://api.tiki.vn/tiniapp/api/graphql/query' \
   -H 'content-type: application/json;charset=UTF-8' \
@@ -30,11 +38,11 @@ RUN touch /$(cat version.json | jq -r '.data.app_version_list_by_app_identifier.
 RUN  \
   if [ -f "$(cat version.json | jq -r '.data.app_version_list_by_app_identifier.data[0].version')_$(cat version.json | jq -r '.data.app_version_list_by_app_identifier.data[0].builds.data[0].build_number')_draft" ] \
   ;then \
-    # current version in draft -> increase build
-    echo "{ \"version\": \"$(cat version.json | jq -r '.data.app_version_list_by_app_identifier.data[0].version')\", \"build_number\": \"$(($(cat version.json | jq -r '.data.app_version_list_by_app_identifier.data[0].builds.data[0].build_number')+1))\" }" > next_version.json \
+  # current version in draft -> increase build
+  echo "{ \"version\": \"$(cat version.json | jq -r '.data.app_version_list_by_app_identifier.data[0].version')\", \"build_number\": \"$(($(cat version.json | jq -r '.data.app_version_list_by_app_identifier.data[0].builds.data[0].build_number')+1))\" }" > next_version.json \
   ;else \
-    # no draft version -> new version
-    echo "{ \"version\": \"$(cat version.json | jq -r '.data.app_version_list_by_app_identifier.data[0].version' | awk -F. -v OFS=. '{$NF += 1 ; print}')\", \"build_number\": \"1\" }" > next_version.json \
+  # no draft version -> new version
+  echo "{ \"version\": \"$(cat version.json | jq -r '.data.app_version_list_by_app_identifier.data[0].version' | awk -F. -v OFS=. '{$NF += 1 ; print}')\", \"build_number\": \"1\" }" > next_version.json \
   ;fi
 
 RUN mkdir -p /.tiki \
@@ -53,4 +61,3 @@ RUN /bin/miniapp-cli-alpine publish \
   --app_version $(cat /next_version.json | jq -r '.version') \
   --build_number $(cat /next_version.json | jq -r '.build_number') \
   --studio_version $STUDIO_VERSION
-
