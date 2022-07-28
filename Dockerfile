@@ -54,6 +54,8 @@ WORKDIR /app
 
 RUN npm install
 
+RUN chmod +x /bin/miniapp-cli-alpine
+
 RUN /bin/miniapp-cli-alpine publish \
   --developer_id $DEVELOPER_ID \
   --app_identifier $APP_ID \

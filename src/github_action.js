@@ -142,7 +142,8 @@ async function run() {
     process.env.PUBLIC_PATH = './';
     process.env.MINIAPP_ENV = 'production';
 
-    const cmd = `miniapp-cli-linux publish . \\
+    const cmd = `chmod +x miniapp-cli-linux && \\
+    miniapp-cli-linux publish . \\
     --developer_id ${developerId} \\
     --app_identifier ${appId} \\
     --credential_path /tmp/credentials.json \\
