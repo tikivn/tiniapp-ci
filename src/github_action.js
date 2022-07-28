@@ -1,20 +1,27 @@
 const core = require('@actions/core');
-const exec = require('@actions/exec')
+const exec = require('@actions/exec');
 const tc = require('@actions/tool-cache');
 const axios = require('axios');
 const fs = require('fs');
-const { dirname } = require('path');
+const {dirname} = require('path');
 
-const CLI = 'https://salt.tikicdn.com/ts/tiniapp/f1/45/2c/cdc59dcf1b1da7062c7b7c1f736aadc0.zip';
+function getCliUrl(studioVersion) {
+  if (studioVersion) {
+    return `https://tiniapp-media.tikicdn.com/tiniapp-ci/tiniapp-ci-v${studioVersion}.zip`;
+  }
+  return 'https://tiniapp-media.tikicdn.com/tiniapp-ci/tiniapp-ci-latest.zip';
+}
 
 function increment(version) {
-  var terms = version.split('.').map(function(e) { return parseInt(e); });
+  var terms = version.split('.').map(function (e) {
+    return parseInt(e);
+  });
   if (terms.length != 3) {
-      return version;
+    return version;
   }
   if (++terms[2] > 9) {
-      ++terms[1];
-      terms[2] = 0;
+    ++terms[1];
+    terms[2] = 0;
   }
   return terms.join('.');
 }
@@ -32,7 +39,8 @@ async function run() {
     core.info(`APP ID: ${appId}`);
 
     // download tiniapp-cli
-    const path = await tc.downloadTool(CLI);
+    const cliUrl = getCliUrl(studioVersion);
+    const path = await tc.downloadTool(cliUrl);
     const dir = dirname(path);
 
     await exec.exec(`unzip ${path} -d ${dir}`);
@@ -44,8 +52,8 @@ async function run() {
       [`${userId}.${developerId}`]: {
         id: developerId,
         accessToken,
-      }
-    }
+      },
+    };
     fs.writeFileSync('/tmp/credentials.json', JSON.stringify(credentails));
 
     const variables = {
@@ -60,8 +68,10 @@ async function run() {
     let nextBuildNumber = inputBuildNumber || 1;
 
     if (!inputVersion && !inputBuildNumber) {
-      const result = await axios.post('https://api.tiki.vn/tiniapp/api/graphql/query', {
-        query: `query app_version_list_by_app_identifier(
+      const result = await axios.post(
+        'https://api.tiki.vn/tiniapp/api/graphql/query',
+        {
+          query: `query app_version_list_by_app_identifier(
             $app_identifier: String!
             $app_version_page: Int!
             $app_version_size: Int!
@@ -88,24 +98,34 @@ async function run() {
                 }
             }
         }`,
-        variables,
-      }, {
-        headers: {
-          'x-miniapp-access-token': accessToken,
-          'content-type': 'application/json;charset=UTF-8',
+          variables,
         },
-      });
-      
+        {
+          headers: {
+            'x-miniapp-access-token': accessToken,
+            'content-type': 'application/json;charset=UTF-8',
+          },
+        },
+      );
+
       core.info(JSON.stringify(result.data));
 
-      const { data: { app_version_list_by_app_identifier: { data: versions } } } = result.data;
+      const {
+        data: {
+          app_version_list_by_app_identifier: {data: versions},
+        },
+      } = result.data;
 
       if (versions && versions.length) {
         const [latestVersion] = versions;
-        const { version, status, builds: { data: builds } } = latestVersion;
+        const {
+          version,
+          status,
+          builds: {data: builds},
+        } = latestVersion;
         const [latestBuild] = builds;
 
-        const { build_number: buildNumber } = latestBuild;
+        const {build_number: buildNumber} = latestBuild;
 
         if (!inputVersion && !inputBuildNumber) {
           if (status === 'draft') {
@@ -122,13 +142,14 @@ async function run() {
     process.env.PUBLIC_PATH = './';
     process.env.MINIAPP_ENV = 'production';
 
-    const cmd = `miniapp-cli-linux publish . \\
+    const cmd = `chmod +x miniapp-cli-linux && \\
+    miniapp-cli-linux publish . \\
     --developer_id ${developerId} \\
     --app_identifier ${appId} \\
     --credential_path /tmp/credentials.json \\
     --app_version ${nextVersion} \\
     --build_number ${nextBuildNumber} \\
-    --studio_version ${studioVersion}`
+    --studio_version ${studioVersion}`;
 
     await exec.exec(cmd);
   } catch (error) {
